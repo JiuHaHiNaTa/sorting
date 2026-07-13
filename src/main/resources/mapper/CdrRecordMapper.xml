@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.CdrRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.CdrRecord">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="service_az_id" property="serviceAzId"/>
+        <result column="resource_id" property="resourceId"/>
+        <result column="usage_amount" property="usageAmount"/>
+        <result column="usage_unit_id" property="usageUnitId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="batchInsert">
+        INSERT INTO cdr_record (id, task_id, operator_id, service_az_id, resource_id, usage_amount, usage_unit_id, start_time, end_time, created_at)
+        VALUES
+        <foreach collection="records" item="r" separator=",">
+            (#{r.id}, #{r.taskId}, #{r.operatorId}, #{r.serviceAzId}, #{r.resourceId}, #{r.usageAmount}, #{r.usageUnitId}, #{r.startTime}, #{r.endTime}, #{r.createdAt})
+        </foreach>
+    </insert>
+
+    <select id="countByOperatorId" resultType="int">
+        SELECT COUNT(1) FROM cdr_record WHERE operator_id=#{operatorId}
+    </select>
+
+    <select id="countByAzId" resultType="int">
+        SELECT COUNT(1) FROM cdr_record WHERE service_az_id=#{azId}
+    </select>
+
+    <select id="countByUnitId" resultType="int">
+        SELECT COUNT(1) FROM cdr_record WHERE usage_unit_id=#{unitId}
+    </select>
+
+</mapper>

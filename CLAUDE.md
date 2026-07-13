@@ -74,3 +74,5 @@ sorting/
 - 遵循 Spring Boot 常规分层架构：controller → service → repository（按需扩展）
 - 测试使用 `@SpringBootTest` 进行集成测试，JUnit 5 进行单元测试
 - 配置放在 `application.yaml` 中（非 properties 格式）
+- 所有时间信息均使用 UTC 时间，并且统一格式
+- 项目中使用了lombok插件，尽量使用lombok注解简化实体类

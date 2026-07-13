@@ -4,7 +4,8 @@ import com.example.sorting.entity.FileServerConfig;
 
 import java.time.LocalDateTime;
 
-public class ConfigResponse {
+public class
+ConfigResponse {
 
     private String id;
     private String serverAddress;

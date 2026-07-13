@@ -1,3 +1,30 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: sorting
+  datasource:
+    url: jdbc:h2:file:./data/sorting;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.sorting.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:default-dev-key}
+    algorithm: PBEWithMD5AndDES

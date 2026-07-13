@@ -64,6 +64,9 @@ class ConfigControllerTest {
         assertEquals("192.168.1.100", data.get("serverAddress"));
         assertEquals(false, data.get("connectivityStatus"));
         assertEquals(false, data.get("enabled"));
+        // AK/SK 应被掩码处理，不返回明文
+        assertEquals("test***", data.get("accessKey"));
+        assertEquals("test***", data.get("secretKey"));
     }
 
     @Test

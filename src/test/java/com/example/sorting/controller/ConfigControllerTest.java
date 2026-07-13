@@ -1,7 +1,5 @@
 package com.example.sorting.controller;
 
-import com.example.sorting.entity.FileServerConfig;
-import com.example.sorting.repository.ConfigMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +22,19 @@ class ConfigControllerTest {
     private RestTemplate restTemplate;
 
     @Autowired
-    private ConfigMapper configMapper;
+    private com.example.sorting.repository.ConfigMapper configMapper;
 
     @BeforeEach
     void setUp() {
         restTemplate = new RestTemplate();
-        // 不将 4xx 响应视为异常，以便测试能正常获取响应体
         restTemplate.setErrorHandler(new org.springframework.web.client.NoOpResponseErrorHandler());
+    }
+
+    private HttpEntity<Map<String, ?>> jsonRequest(Map<String, ?> body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity<>(body, headers);
     }
 
     private String url(String path) {
@@ -49,8 +53,8 @@ class ConfigControllerTest {
                 "fileDirectory", "/data/cdr"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                url("/config/add"), request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/config/add"), HttpMethod.POST, jsonRequest(request), Map.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("SUCCESS", response.getBody().get("code"));
@@ -65,12 +69,10 @@ class ConfigControllerTest {
     @Test
     @SuppressWarnings("unchecked")
     void addConfig_shouldReturnParamErrorWhenFieldMissing() {
-        Map<String, String> request = Map.of(
-                "serverAddress", "192.168.1.100"
-        );
+        Map<String, String> request = Map.of("serverAddress", "192.168.1.100");
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                url("/config/add"), request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/config/add"), HttpMethod.POST, jsonRequest(request), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("PARAM_001", response.getBody().get("code"));
@@ -88,8 +90,8 @@ class ConfigControllerTest {
                 "fileDirectory", "/data/cdr"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                url("/config/add"), request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/config/add"), HttpMethod.POST, jsonRequest(request), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("PARAM_001", response.getBody().get("code"));
@@ -106,12 +108,14 @@ class ConfigControllerTest {
                 "secretKey", "test-sk",
                 "fileDirectory", "/data/cdr"
         );
-        ResponseEntity<Map> addResp = restTemplate.postForEntity(url("/config/add"), addReq, Map.class);
+        ResponseEntity<Map> addResp = restTemplate.exchange(
+                url("/config/add"), HttpMethod.POST, jsonRequest(addReq), Map.class);
         String id = (String) ((Map<String, Object>) addResp.getBody().get("data")).get("id");
 
         Map<String, Object> toggleReq = Map.of("id", id, "enabled", true);
-        ResponseEntity<Map> toggleResp = restTemplate.postForEntity(
-                url("/config/toggle"), toggleReq, Map.class);
+
+        ResponseEntity<Map> toggleResp = restTemplate.exchange(
+                url("/config/toggle"), HttpMethod.POST, jsonRequest(toggleReq), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, toggleResp.getStatusCode());
         assertEquals("CONFIG_002", toggleResp.getBody().get("code"));
@@ -130,8 +134,8 @@ class ConfigControllerTest {
                 "fileDirectory", "/d"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                url("/config/modify"), modifyReq, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/config/modify"), HttpMethod.POST, jsonRequest(modifyReq), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("CONFIG_001", response.getBody().get("code"));
@@ -145,8 +149,8 @@ class ConfigControllerTest {
                 "enabled", false
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                url("/config/toggle"), toggleReq, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/config/toggle"), HttpMethod.POST, jsonRequest(toggleReq), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("CONFIG_001", response.getBody().get("code"));
@@ -163,12 +167,13 @@ class ConfigControllerTest {
                 "secretKey", "test-sk",
                 "fileDirectory", "/data/cdr"
         );
-        ResponseEntity<Map> addResp = restTemplate.postForEntity(url("/config/add"), addReq, Map.class);
+        ResponseEntity<Map> addResp = restTemplate.exchange(
+                url("/config/add"), HttpMethod.POST, jsonRequest(addReq), Map.class);
         String id = (String) ((Map<String, Object>) addResp.getBody().get("data")).get("id");
 
         Map<String, Object> toggleReq = Map.of("id", id, "enabled", false);
-        ResponseEntity<Map> toggleResp = restTemplate.postForEntity(
-                url("/config/toggle"), toggleReq, Map.class);
+        ResponseEntity<Map> toggleResp = restTemplate.exchange(
+                url("/config/toggle"), HttpMethod.POST, jsonRequest(toggleReq), Map.class);
 
         assertEquals(HttpStatus.OK, toggleResp.getStatusCode());
         assertEquals("SUCCESS", toggleResp.getBody().get("code"));

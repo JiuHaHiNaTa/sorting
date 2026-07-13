@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -33,7 +32,6 @@ class ConnectionControllerTest {
     @BeforeEach
     void setUp() {
         restTemplate = new RestTemplate();
-        // 不将 4xx 响应视为异常，以便测试能正常获取响应体
         restTemplate.setErrorHandler(new org.springframework.web.client.NoOpResponseErrorHandler());
         baseUrl = "http://localhost:" + port;
 
@@ -54,15 +52,21 @@ class ConnectionControllerTest {
         configMapper.insert(config);
     }
 
+    private HttpEntity<Map<String, ?>> jsonRequest(Map<String, ?> body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity<>(body, headers);
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     void checkConnection_shouldReturnConnectionErrorWhenMinioUnreachable() {
         Map<String, String> request = Map.of("id", configId);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                baseUrl + "/connection/check", request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                baseUrl + "/connection/check", HttpMethod.POST, jsonRequest(request), Map.class);
 
-        // 没有真实 MinIO 服务器，预期返回连通性相关错误码
         assertEquals(HttpStatus.OK, response.getStatusCode());
         String code = (String) response.getBody().get("code");
         assertTrue(code.equals("CNN_001") || code.equals("CNN_003"));
@@ -73,8 +77,8 @@ class ConnectionControllerTest {
     void checkConnection_shouldReturnConfig001WhenNotFound() {
         Map<String, String> request = Map.of("id", UUID.randomUUID().toString());
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                baseUrl + "/connection/check", request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                baseUrl + "/connection/check", HttpMethod.POST, jsonRequest(request), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("CONFIG_001", response.getBody().get("code"));
@@ -85,8 +89,8 @@ class ConnectionControllerTest {
     void checkConnection_shouldReturnParamErrorWhenIdBlank() {
         Map<String, String> request = Map.of("id", "");
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                baseUrl + "/connection/check", request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                baseUrl + "/connection/check", HttpMethod.POST, jsonRequest(request), Map.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("PARAM_001", response.getBody().get("code"));

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.ConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.FileServerConfig">
+        <id column="id" property="id"/>
+        <result column="server_address" property="serverAddress"/>
+        <result column="server_port" property="serverPort"/>
+        <result column="bucket_name" property="bucketName"/>
+        <result column="access_key" property="accessKey" typeHandler="com.example.sorting.handler.EncryptTypeHandler"/>
+        <result column="secret_key" property="secretKey" typeHandler="com.example.sorting.handler.EncryptTypeHandler"/>
+        <result column="file_directory" property="fileDirectory"/>
+        <result column="connectivity_status" property="connectivityStatus"/>
+        <result column="enabled" property="enabled"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, server_address, server_port, bucket_name,
+        access_key, secret_key, file_directory,
+        connectivity_status, enabled, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.example.sorting.entity.FileServerConfig">
+        INSERT INTO file_server_config (id, server_address, server_port, bucket_name,
+                                        access_key, secret_key, file_directory,
+                                        connectivity_status, enabled, created_at, updated_at)
+        VALUES (#{id}, #{serverAddress}, #{serverPort}, #{bucketName},
+                #{accessKey, typeHandler=com.example.sorting.handler.EncryptTypeHandler},
+                #{secretKey, typeHandler=com.example.sorting.handler.EncryptTypeHandler},
+                #{fileDirectory}, #{connectivityStatus}, #{enabled},
+                #{createdAt}, #{updatedAt})
+    </insert>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM file_server_config
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.example.sorting.entity.FileServerConfig">
+        UPDATE file_server_config
+        SET server_address = #{serverAddress},
+            server_port    = #{serverPort},
+            bucket_name    = #{bucketName},
+            access_key     = #{accessKey, typeHandler=com.example.sorting.handler.EncryptTypeHandler},
+            secret_key     = #{secretKey, typeHandler=com.example.sorting.handler.EncryptTypeHandler},
+            file_directory = #{fileDirectory},
+            updated_at     = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateConnectivityStatus">
+        UPDATE file_server_config
+        SET connectivity_status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateEnabled">
+        UPDATE file_server_config
+        SET enabled = #{enabled},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM file_server_config
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>

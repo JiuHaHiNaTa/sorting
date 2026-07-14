@@ -13,7 +13,26 @@ public enum ErrorCode {
     CNN_002("CNN_002", "存储桶不存在"),
     CNN_003("CNN_003", "服务器连接异常"),
 
-    SYS_001("SYS_001", "未知服务端异常");
+    SYS_001("SYS_001", "未知服务端异常"),
+
+    // 基础数据类
+    OP_001("OP_001", "运营商不存在"),
+    OP_002("OP_002", "运营商 code 已存在"),
+    OP_003("OP_003", "运营商已被 cdr_record 引用，无法删除"),
+    AZ_001("AZ_001", "可用区不存在"),
+    AZ_002("AZ_002", "可用区 code 已存在"),
+    AZ_003("AZ_003", "可用区已被 cdr_record 引用，无法删除"),
+    UNIT_001("UNIT_001", "使用量单位不存在"),
+    UNIT_002("UNIT_002", "使用量单位 code 已存在"),
+    UNIT_003("UNIT_003", "使用量单位已被 cdr_record 引用，无法删除"),
+
+    // 分拣类
+    SORT_001("SORT_001", "分拣任务不存在"),
+    SORT_002("SORT_002", "没有可执行的分拣任务"),
+    SORT_003("SORT_003", "分拣任务状态不允许该操作"),
+    SORT_004("SORT_004", "文件命名不符合规范"),
+    SORT_005("SORT_005", "ZIP 解压失败"),
+    SORT_006("SORT_006", "CSV 解析失败");
 
     private final String code;
     private final String message;

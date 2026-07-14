@@ -87,6 +87,9 @@ public class SortingService {
         task.setUpdatedAt(LocalDateTime.now());
         taskMapper.updateStatus(task.getId(), "PENDING");
         taskMapper.updateErrorMessage(task.getId(), null);
+
+        // 重新提交任务
+        pipelineExecutor.startTask(taskMapper.selectById(id));
     }
 
     public SortingTask detail(String id) {

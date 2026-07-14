@@ -12,7 +12,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.springframework.test.context.jdbc.Sql;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, statements = "DELETE FROM usage_unit")
 class UsageUnitControllerTest {
 
     @LocalServerPort

@@ -83,10 +83,11 @@ class SortingServiceTest {
         SortingTask failed = new SortingTask();
         failed.setId("failed-task");
         failed.setStatus("FAILED");
-        when(taskMapper.selectById("failed-task")).thenReturn(failed);
+        when(taskMapper.selectById("failed-task")).thenReturn(failed, failed);
 
         sortingService.retry("failed-task");
         verify(taskMapper).updateStatus("failed-task", "PENDING");
+        verify(pipelineExecutor).startTask(any(SortingTask.class));
     }
 
     @Test

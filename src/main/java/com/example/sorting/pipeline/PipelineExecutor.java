@@ -62,9 +62,9 @@ public class PipelineExecutor {
             boolean stepSuccess = false;
             String errorMsg = null;
 
-            for (int retry = 0; retry <= MAX_RETRY; retry++) {
-                if (retry > 0) {
-                    log.info("重试步骤 [{}] 任务 [{}], 第 {}/{} 次", handler.getStepName(), task.getId(), retry, MAX_RETRY);
+            for (int attempt = 0; attempt < MAX_RETRY; attempt++) {
+                if (attempt > 0) {
+                    log.info("重试步骤 [{}] 任务 [{}], 第 {}/{} 次", handler.getStepName(), task.getId(), attempt, MAX_RETRY);
                     handler.rollback(context);
                 }
 
@@ -72,9 +72,7 @@ public class PipelineExecutor {
                 stepLog.setId(UUID.randomUUID().toString());
                 stepLog.setTaskId(task.getId());
                 stepLog.setStepName(handler.getStepName());
-                stepLog.setStatus("RUNNING");
                 stepLog.setStartedAt(LocalDateTime.now());
-                stepLogMapper.insert(stepLog);
 
                 try {
                     StepResult result = handler.execute(context);
@@ -86,11 +84,11 @@ public class PipelineExecutor {
                         stepSuccess = true;
                         break;
                     } else {
-                        errorMsg = result.getMessage();
                         stepLog.setStatus("FAILED");
                         stepLog.setCompletedAt(LocalDateTime.now());
-                        stepLog.setDetail(errorMsg);
+                        stepLog.setDetail(result.getMessage());
                         stepLogMapper.insert(stepLog);
+                        errorMsg = result.getMessage();
                     }
                 } catch (Exception e) {
                     errorMsg = e.getMessage();

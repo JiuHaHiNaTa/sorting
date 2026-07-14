@@ -76,3 +76,4 @@ sorting/
 - 配置放在 `application.yaml` 中（非 properties 格式）
 - 所有时间信息均使用 UTC 时间，并且统一格式
 - 项目中使用了lombok插件，尽量使用lombok注解简化实体类
+- 测试用例完成后需要清理测试用例产生的数据，避免测试用例之间的冲突

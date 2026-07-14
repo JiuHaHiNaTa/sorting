@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.SortingStepLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.SortingStepLog">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="step_name" property="stepName"/>
+        <result column="status" property="status"/>
+        <result column="started_at" property="startedAt"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="detail" property="detail"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.sorting.entity.SortingStepLog">
+        INSERT INTO sorting_step_log (id, task_id, step_name, status,
+                                      started_at, completed_at, detail)
+        VALUES (#{id}, #{taskId}, #{stepName}, #{status},
+                #{startedAt}, #{completedAt}, #{detail})
+    </insert>
+
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT * FROM sorting_step_log WHERE task_id = #{taskId}
+    </select>
+</mapper>

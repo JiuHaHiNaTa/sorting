@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.SortingTaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.SortingTask">
+        <id column="id" property="id"/>
+        <result column="file_server_id" property="fileServerId"/>
+        <result column="status" property="status"/>
+        <result column="current_step" property="currentStep"/>
+        <result column="retry_count" property="retryCount"/>
+        <result column="error_message" property="errorMessage"/>
+        <result column="started_at" property="startedAt"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="timeout_at" property="timeoutAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="BackupResultMap" type="com.example.sorting.entity.SortingTaskBackup">
+        <id column="id" property="id"/>
+        <result column="file_server_id" property="fileServerId"/>
+        <result column="status" property="status"/>
+        <result column="current_step" property="currentStep"/>
+        <result column="retry_count" property="retryCount"/>
+        <result column="error_message" property="errorMessage"/>
+        <result column="started_at" property="startedAt"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="timeout_at" property="timeoutAt"/>
+        <result column="archived_at" property="archivedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.sorting.entity.SortingTask">
+        INSERT INTO sorting_task (id, file_server_id, status, current_step, retry_count,
+                                  error_message, started_at, completed_at, timeout_at,
+                                  created_at, updated_at)
+        VALUES (#{id}, #{fileServerId}, #{status}, #{currentStep}, #{retryCount},
+                #{errorMessage}, #{startedAt}, #{completedAt}, #{timeoutAt},
+                #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE sorting_task SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <update id="updateStep">
+        UPDATE sorting_task SET current_step = #{currentStep} WHERE id = #{id}
+    </update>
+
+    <update id="incrementRetry">
+        UPDATE sorting_task SET retry_count = COALESCE(retry_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="updateErrorMessage">
+        UPDATE sorting_task SET error_message = #{errorMessage} WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM sorting_task WHERE id = #{id}
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT * FROM sorting_task WHERE status = #{status}
+    </select>
+
+    <select id="selectRunningTimeoutTasks" resultMap="BaseResultMap">
+        SELECT * FROM sorting_task
+        WHERE status = 'RUNNING' AND timeout_at &lt; #{now}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM sorting_task
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM sorting_task WHERE id = #{id}
+    </delete>
+
+    <insert id="insertBackup" parameterType="com.example.sorting.entity.SortingTaskBackup">
+        INSERT INTO sorting_task_backup (id, file_server_id, status, current_step, retry_count,
+                                         error_message, started_at, completed_at, timeout_at,
+                                         archived_at, created_at, updated_at)
+        VALUES (#{id}, #{fileServerId}, #{status}, #{currentStep}, #{retryCount},
+                #{errorMessage}, #{startedAt}, #{completedAt}, #{timeoutAt},
+                #{archivedAt}, #{createdAt}, #{updatedAt})
+    </insert>
+</mapper>

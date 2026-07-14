@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.UsageUnitMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.UsageUnit">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.sorting.entity.UsageUnit">
+        INSERT INTO usage_unit (id, code, name, created_at, updated_at)
+        VALUES (#{id}, #{code}, #{name}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="updateById" parameterType="com.example.sorting.entity.UsageUnit">
+        UPDATE usage_unit
+        SET code=#{code}, name=#{name}, updated_at=CURRENT_TIMESTAMP
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM usage_unit WHERE id=#{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM usage_unit WHERE id=#{id}
+    </select>
+
+    <select id="selectByCode" resultMap="BaseResultMap">
+        SELECT * FROM usage_unit WHERE code=#{code}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM usage_unit ORDER BY created_at ASC
+    </select>
+
+    <select id="countByCode" resultType="int">
+        SELECT COUNT(1) FROM usage_unit WHERE code=#{code}
+    </select>
+
+</mapper>

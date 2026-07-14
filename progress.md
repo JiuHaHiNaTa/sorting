@@ -2,69 +2,67 @@
 
 ## 会话 1 — 2026-07-13
 
-### 第一阶段：完整开发 + API 验证
+### 第一阶段：完整开发 + API 验证（v0.0.1）
 
-#### 任务
-完成文件服务器配置管理与连通性测试 v0.0.1 的完整开发。
-
-#### 测试结果
-- **测试总数:** 26
-- **成功:** 26
-- **失败:** 0
-- **错误:** 0
-
-#### API 验证（curl）
-| 端点 | 预期 | 实际 |
-|------|------|------|
-| POST /config/add | 201/Success | OK ✅ |
-| POST /config/modify (不存在) | 400/CONFIG_001 | OK ✅ |
-| POST /config/toggle (未连通启用) | 400/CONFIG_002 | OK ✅ |
-| POST /config/toggle (停用) | 200/Success | OK ✅ |
-| POST /connection/check | CNN_001/CNN_003 | OK ✅ |
-| POST /config/add (参数校验) | 400/PARAM_001 | OK ✅ |
-
-#### Git 提交
-- 分支: `feat/config-management-v0.0.1` → 当前为 `dev`
-- 首次提交数: 11
-
-#### 错误记录
-| 错误 | 尝试 | 解决 |
-|------|------|------|
-| MyBatis 自动配置未激活 (SB 4.1.0) | 1 | MyBatisConfig 手动配置 |
-| TestRestTemplate not found (SB 4.1.0) | 1 | 改用 RestTemplate + NoOpResponseErrorHandler |
-| 4xx 响应 HTML 格式 | 1 | 增加 Accept: application/json 请求头 |
-| EncryptTypeHandler 静态初始化失败 | 1 | 改为 MyBatisConfig 注入方式 |
-| Jasypt 导入路径错误 | 1 | 修正为 `com.ulisesbocchio` |
-| MinioException Mockito 模拟问题 | 1 | 使用 InsufficientDataException 子类 |
+...
 
 ---
 
 ## 会话 2 — 2026-07-13（安全修复）
 
-### 任务
-修复 API 响应中 AK/SK 明文泄露问题。
+...
 
-#### 变更
-1. 创建 `ConfigResponse` — AK/SK 前4位掩码输出的响应 DTO
-2. 更新 `ConfigController` — 返回类型从 `FileServerConfig` 改为 `ConfigResponse`
-3. 更新 `ConfigControllerTest` — 增加 AK/SK 掩码断言
+---
+
+## 会话 3 — 2026-07-14
+
+### v0.0.2 话单分拣系统实现
+
+#### 设计阶段
+- 完成话单分拣系统设计文档 `docs/superpowers/specs/2026-07-13-cdr-sorting-design.md`
+- 设计决策：Pipeline 流水线模式、逻辑外键、MasterDataCache 缓存、6 步骤处理流
+- 设计文档已提交 `fede8ac`
+
+#### 实现阶段（10 个 Task 全部完成）
+
+| Task | 提交 | 状态 |
+|------|------|------|
+| 1. Schema + 实体层 | `f194e45` | ✅ |
+| 2. Mapper 层 | `4f77eac` | ✅ |
+| 3. 错误码 + DTO | `555bf95` | ✅ |
+| 4. MasterDataCache | `4ff1658` | ✅ |
+| 5. 基础数据 Service | `c39d2a6` | ✅ |
+| 6. 基础数据 Controller | `a01e8ec` | ✅ |
+| 7. Pipeline 核心框架 | `fc937b1` | ✅ |
+| 8. StepHandlers | `09f3c4b` | ✅ |
+| 9. Sorting API | `0bfbc40` | ✅ |
+| 10. 最终验证 | — | ✅ |
+
+#### 重要修复
+- **Lombok 改造**: 所有 8 个实体类从 manual getter/setter 改为 `@Data` 注解
+- **schema.sql 不同步修复**: `etc/schema.sql` 和 `src/main/resources/schema.sql` 不一致，已同步
+- **H2 数据库文件残留**: `data/` 目录导致测试失败，已清理
 
 #### 测试结果
-- **测试总数:** 26（不变）
-- **成功:** 26
+- **测试总数:** 104
+- **成功:** 104
 - **失败:** 0
 
 #### API 验证（curl）
-```
-"accessKey": "this-is-ak-long"  →  "accessKey": "this***"
-"secretKey": "this-is-sk-long"  →  "secretKey": "this***"
-```
+| 端点 | 预期 | 实际 |
+|------|------|------|
+| POST /operator/add | 201/Success | OK ✅ |
+| POST /operator/add (重复) | 400/OP_002 | OK ✅ |
+| POST /az/add | 200/Success | OK ✅ |
+| POST /usage-unit/add | 200/Success | OK ✅ |
+| POST /operator/list | 200/列表 | OK ✅ |
+| POST /sorting/trigger (无可用服务器) | 400/SORT_002 | OK ✅ |
+| POST /config/add (v0.0.1 回归) | 200/AK掩码 | OK ✅ |
 
-#### 新增提交
-| Hash | Message |
-|------|---------|
-| `80c67eb` | fix: mask AK/SK in API response to prevent credential leakage |
-
-#### 待处理安全项
-- Jasypt 默认密钥 `default-dev-key`
-- H2 Console 生产环境启用
+#### 错误记录
+| 错误 | 尝试 | 解决 |
+|------|------|------|
+| schema.sql 不同步 → 缺少 sorting_task 表 | 1 | 复制 etc/schema.sql 到 src/main/resources/ |
+| H2 数据库文件残留 → Controller 测试 400 | 1 | 删除 data/ 目录后重新测试 |
+| Worktree agent 从旧基线创建 → 冲突 | 2+ | 合并时选择 `--ours` 解决冲突 |
+| Task 9 agent 未创建文件 | 1 | 手动创建 SortingService/Controller/Test |

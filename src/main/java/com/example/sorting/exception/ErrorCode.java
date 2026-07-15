@@ -29,7 +29,15 @@ public enum ErrorCode {
     // 分拣类
     SORT_001("SORT_001", "分拣任务不存在"),
     SORT_002("SORT_002", "没有可执行的分拣任务"),
-    SORT_003("SORT_003", "分拣任务状态不允许该操作");
+    SORT_003("SORT_003", "分拣任务状态不允许该操作"),
+    SORT_004("SORT_004", "文件名命名不符合规范"),
+    SORT_005("SORT_005", "ZIP 解压失败"),
+    SORT_006("SORT_006", "CSV 解析失败"),
+
+    FILE_001("FILE_001", "MinIO 目录不存在"),
+    FILE_002("FILE_002", "MinIO 文件操作失败"),
+
+    PUSH_001("PUSH_001", "推送失败");
 
     private final String code;
     private final String message;

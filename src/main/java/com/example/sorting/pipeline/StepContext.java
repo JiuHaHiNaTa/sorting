@@ -28,4 +28,5 @@ public class StepContext {
     public static final String KEY_VALID_FILES = "validFiles";
     public static final String KEY_EXTRACTED_FILES = "extractedFiles";
     public static final String KEY_CDR_RECORDS = "cdrRecords";
+    public static final String KEY_ERROR_FILES = "errorFiles";
 }

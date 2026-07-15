@@ -17,6 +17,11 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -28,3 +33,15 @@ jasypt:
   encryptor:
     password: ${JASYPT_ENCRYPTOR_PASSWORD:default-dev-key}
     algorithm: PBEWithMD5AndDES
+
+cdr:
+  push:
+    type: kafka
+    batch-size: 100
+    topic: cdr-record-push
+  archive:
+    directory-pattern: "yyyyMMdd"
+  cleanup:
+    file-retention-days: 7
+    error-record-retention-days: 30
+    cron: "0 0 2 * * ?"

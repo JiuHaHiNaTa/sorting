@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,22 +61,29 @@ public class ExtractStepHandler implements StepHandler {
             try {
                 // 下载 ZIP 到本地
                 localZipPath = fileService.downloadFile(config, sourceDir + "/" + zipFile);
-                File zipFileObj = localZipPath.toFile();
-                long zipSize = zipFileObj.length();
 
                 // 解压并校验
                 List<String> csvEntries = new ArrayList<>();
                 long totalCsvSize = 0;
                 int csvCount = 0;
 
-                try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFileObj))) {
+                try (ZipInputStream zis = new ZipInputStream(new FileInputStream(localZipPath.toFile()))) {
                     ZipEntry entry;
                     while ((entry = zis.getNextEntry()) != null) {
                         if (entry.isDirectory()) continue;
                         // 只关注 CSV 文件
                         if (entry.getName().toLowerCase().endsWith(".csv")) {
                             csvCount++;
-                            totalCsvSize += entry.getSize();
+                            long entrySize = entry.getSize();
+                            if (entrySize < 0) {
+                                // 数据描述符模式，getSize 不可靠；读取并计数字节
+                                byte[] buf = new byte[8192];
+                                int read;
+                                while ((read = zis.read(buf)) != -1) {
+                                    entrySize += read;
+                                }
+                            }
+                            totalCsvSize += entrySize;
                             csvEntries.add(entry.getName());
                         }
                     }

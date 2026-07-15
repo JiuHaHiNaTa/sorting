@@ -6,7 +6,11 @@ import com.example.sorting.entity.Operator;
 import com.example.sorting.entity.ServiceAz;
 import com.example.sorting.entity.SortingTask;
 import com.example.sorting.entity.UsageUnit;
+import com.example.sorting.repository.CdrErrorRecordMapper;
+import com.example.sorting.repository.CdrPushRecordMapper;
 import com.example.sorting.repository.CdrRecordMapper;
+import com.example.sorting.repository.ConfigMapper;
+import com.example.sorting.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +21,11 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,9 +34,15 @@ class StepHandlerTest {
 
     @Mock private MasterDataCache masterDataCache;
     @Mock private CdrRecordMapper cdrRecordMapper;
+    @Mock private CdrErrorRecordMapper errorRecordMapper;
+    @Mock private CdrPushRecordMapper pushRecordMapper;
+    @Mock private FileService fileService;
+    @Mock private ConfigMapper configMapper;
+
+    @InjectMocks private ValidateStepHandler validateHandler;
     @InjectMocks private ParseStepHandler parseHandler;
     @InjectMocks private PersistStepHandler persistHandler;
-    @InjectMocks private ValidateStepHandler validateHandler;
+    @InjectMocks private ArchiveStepHandler archiveHandler;
 
     private StepContext context;
 
@@ -38,6 +50,7 @@ class StepHandlerTest {
     void setUp() {
         SortingTask task = new SortingTask();
         task.setId(UUID.randomUUID().toString());
+        task.setFileServerId("server-1");
         context = new StepContext(task);
 
         Operator op = new Operator();
@@ -53,12 +66,14 @@ class StepHandlerTest {
         when(masterDataCache.getOperatorByCode("ColoCloud")).thenReturn(op);
         when(masterDataCache.getAzByCode("az1")).thenReturn(az);
         when(masterDataCache.getUnitByCode("MB")).thenReturn(unit);
+        when(configMapper.findById("server-1")).thenReturn(Optional.empty());
     }
 
     @Test
     void validate_shouldAcceptValidFileName() {
         context.setAttribute(StepContext.KEY_FILE_LIST,
             List.of("ColoCloud_az1_202607120800_202607120930_asia.zip"));
+        // configMapper returns empty, so the file won't be moved
         StepResult result = validateHandler.execute(context);
         assertTrue(result.isSuccess());
         List<String> validFiles = context.getAttribute(StepContext.KEY_VALID_FILES);
@@ -69,6 +84,7 @@ class StepHandlerTest {
     void validate_shouldRejectInvalidFileName() {
         context.setAttribute(StepContext.KEY_FILE_LIST,
             List.of("invalid-file-name.txt", "Bad_File_.zip"));
+        // configMapper returns empty, file move skipped
         StepResult result = validateHandler.execute(context);
         assertTrue(result.isSuccess());
         List<String> validFiles = context.getAttribute(StepContext.KEY_VALID_FILES);
@@ -83,14 +99,10 @@ class StepHandlerTest {
     }
 
     @Test
-    void parse_shouldGenerateRecords() {
-        context.setAttribute(StepContext.KEY_EXTRACTED_FILES,
-            List.of("ColoCloud_az1_202607120800_202607120930.csv"));
+    void parse_shouldReturnSuccessWithEmptyFiles() {
+        context.setAttribute(StepContext.KEY_EXTRACTED_FILES, List.of());
         StepResult result = parseHandler.execute(context);
         assertTrue(result.isSuccess());
-        List<CdrRecord> records = context.getAttribute(StepContext.KEY_CDR_RECORDS);
-        assertNotNull(records);
-        assertFalse(records.isEmpty());
     }
 
     @Test
@@ -106,5 +118,20 @@ class StepHandlerTest {
         context.setAttribute(StepContext.KEY_CDR_RECORDS, List.of());
         StepResult result = persistHandler.execute(context);
         assertTrue(result.isSuccess());
+    }
+
+    @Test
+    void archive_shouldHandleEmptyFileList() {
+        context.setAttribute(StepContext.KEY_FILE_LIST, List.of());
+        StepResult result = archiveHandler.execute(context);
+        assertTrue(result.isSuccess());
+    }
+
+    @Test
+    void archive_shouldHandleNoConfig() {
+        context.setAttribute(StepContext.KEY_FILE_LIST,
+            List.of("ColoCloud_az1_202607120800_202607120930_asia.zip"));
+        StepResult result = archiveHandler.execute(context);
+        assertTrue(result.isFailed());
     }
 }

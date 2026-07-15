@@ -66,3 +66,30 @@
 | H2 数据库文件残留 → Controller 测试 400 | 1 | 删除 data/ 目录后重新测试 |
 | Worktree agent 从旧基线创建 → 冲突 | 2+ | 合并时选择 `--ours` 解决冲突 |
 | Task 9 agent 未创建文件 | 1 | 手动创建 SortingService/Controller/Test |
+
+---
+
+## 会话 4 — 2026-07-16
+
+### v0.0.3 话单分拣系统 — 最终验证与收尾
+
+#### 验证结果
+
+| 验证项 | 结果 |
+|--------|------|
+| 全量构建 | ✅ mvn clean test → 116 tests, 0 failures, 0 errors |
+| 应用启动 | ✅ Started SortingApplication in 0.798 秒 |
+| POST /operator/add | ✅ HTTP 200 |
+| POST /az/add | ✅ HTTP 200 |
+| POST /usage-unit/add | ✅ HTTP 200 |
+| POST /operator/list | ✅ 返回列表 |
+| POST /sorting/trigger (无可用服务器) | ✅ SORT_002 错误 |
+| POST /config/add (AK/SK 掩码回归) | ✅ `this***` 掩码正确 |
+
+#### v0.0.3 功能总结
+- **FileService** — MinIO 文件操作抽象层（checkDirectoryExists/listFiles/downloadFile/moveFile/removeObject）
+- **StepHandler 改造** — 6 个 Handler 全部替换为真实实现（扫描 → 校验→解压→解析→持久化→归档）
+- **CdrPushService** — Kafka 推送实现，定时批量推送，ID → Code 翻译
+- **FileCleanupJob** — 定时清理 7 天前备份文件、30 天前异常记录
+- **CdrErrorRecord** — 异常文件记录表
+- **CdrPushRecord** — 推送记录表（PENDING → PUSHED → FAILED）

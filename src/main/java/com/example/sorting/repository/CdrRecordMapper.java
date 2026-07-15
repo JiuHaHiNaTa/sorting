@@ -14,6 +14,8 @@ public interface CdrRecordMapper {
 
     int batchInsert(@Param("records") List<CdrRecord> records);
 
+    CdrRecord selectById(@Param("id") String id);
+
     int countByOperatorId(@Param("operatorId") String operatorId);
 
     int countByAzId(@Param("azId") String azId);

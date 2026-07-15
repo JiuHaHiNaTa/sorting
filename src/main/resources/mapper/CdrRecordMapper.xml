@@ -24,6 +24,10 @@
         </foreach>
     </insert>
 
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM cdr_record WHERE id=#{id}
+    </select>
+
     <select id="countByOperatorId" resultType="int">
         SELECT COUNT(1) FROM cdr_record WHERE operator_id=#{operatorId}
     </select>

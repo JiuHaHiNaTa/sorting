@@ -1,11 +1,13 @@
 package com.example.sorting.pipeline;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Order(3)
 public class ExtractStepHandler implements StepHandler {
 
     @Override

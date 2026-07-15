@@ -1,8 +1,10 @@
 package com.example.sorting.pipeline;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(6)
 public class ArchiveStepHandler implements StepHandler {
 
     @Override

@@ -6,6 +6,7 @@ import com.example.sorting.entity.Operator;
 import com.example.sorting.entity.ServiceAz;
 import com.example.sorting.entity.UsageUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Component
+@Order(4)
 public class ParseStepHandler implements StepHandler {
 
     @Autowired

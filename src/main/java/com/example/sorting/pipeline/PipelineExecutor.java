@@ -30,7 +30,7 @@ public class PipelineExecutor {
     private static final int MAX_RETRY = 3;
     private static final int TIMEOUT_MINUTES = 5;
 
-    @Autowired(required = false)
+    @Autowired
     private List<StepHandler> stepHandlers = Collections.emptyList();
     @Autowired
     private SortingTaskMapper taskMapper;

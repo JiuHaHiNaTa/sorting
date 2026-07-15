@@ -1,5 +1,6 @@
 package com.example.sorting.pipeline;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
+@Order(2)
 public class ValidateStepHandler implements StepHandler {
 
     private static final Pattern FILE_NAME_PATTERN =

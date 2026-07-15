@@ -3,11 +3,13 @@ package com.example.sorting.pipeline;
 import com.example.sorting.entity.CdrRecord;
 import com.example.sorting.repository.CdrRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Order(5)
 public class PersistStepHandler implements StepHandler {
 
     @Autowired

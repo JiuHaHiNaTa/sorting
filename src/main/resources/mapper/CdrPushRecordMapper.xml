@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.CdrPushRecordMapper">
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.CdrPushRecord">
+        <id column="id" property="id"/>
+        <result column="cdr_record_id" property="cdrRecordId"/>
+        <result column="push_status" property="pushStatus"/>
+        <result column="pushed_at" property="pushedAt"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="batchInsert">
+        INSERT INTO cdr_push_record (id, cdr_record_id, push_status, pushed_at, fail_reason, created_at)
+        VALUES
+        <foreach collection="records" item="r" separator=",">
+            (#{r.id}, #{r.cdrRecordId}, #{r.pushStatus}, #{r.pushedAt}, #{r.failReason}, #{r.createdAt})
+        </foreach>
+    </insert>
+
+    <select id="selectPendingByLimit" resultMap="BaseResultMap">
+        SELECT * FROM cdr_push_record WHERE push_status='PENDING' ORDER BY created_at ASC LIMIT #{limit}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE cdr_push_record SET push_status=#{pushStatus},
+            pushed_at=#{pushedAt}, fail_reason=#{failReason}
+        WHERE id=#{id}
+    </update>
+
+    <select id="selectByCdrRecordId" resultMap="BaseResultMap">
+        SELECT * FROM cdr_push_record WHERE cdr_record_id=#{cdrRecordId}
+    </select>
+</mapper>

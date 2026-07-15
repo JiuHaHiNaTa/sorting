@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sorting.repository.CdrErrorRecordMapper">
+    <resultMap id="BaseResultMap" type="com.example.sorting.entity.CdrErrorRecord">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="file_name" property="fileName"/>
+        <result column="error_type" property="errorType"/>
+        <result column="error_reason" property="errorReason"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.sorting.entity.CdrErrorRecord">
+        INSERT INTO cdr_error_record (id, task_id, file_name, error_type, error_reason, created_at)
+        VALUES (#{id}, #{taskId}, #{fileName}, #{errorType}, #{errorReason}, #{createdAt})
+    </insert>
+
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT * FROM cdr_error_record WHERE task_id=#{taskId} ORDER BY created_at ASC
+    </select>
+
+    <select id="selectOldRecords" resultMap="BaseResultMap">
+        SELECT * FROM cdr_error_record WHERE created_at &lt; #{before}
+    </select>
+
+    <delete id="deleteOldRecords">
+        DELETE FROM cdr_error_record WHERE created_at &lt; #{before}
+    </delete>
+</mapper>

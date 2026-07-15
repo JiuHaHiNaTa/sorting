@@ -87,3 +87,21 @@ CREATE TABLE IF NOT EXISTS sorting_step_log (
     completed_at    TIMESTAMP,
     detail          TEXT
 );
+
+CREATE TABLE IF NOT EXISTS cdr_error_record (
+    id              VARCHAR(36)     PRIMARY KEY,
+    task_id         VARCHAR(36)     NOT NULL,
+    file_name       VARCHAR(255)    NOT NULL,
+    error_type      VARCHAR(50)     NOT NULL,
+    error_reason    TEXT,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cdr_push_record (
+    id              VARCHAR(36)     PRIMARY KEY,
+    cdr_record_id   VARCHAR(36)     NOT NULL,
+    push_status     VARCHAR(20)     NOT NULL DEFAULT 'PENDING',
+    pushed_at       TIMESTAMP,
+    fail_reason     TEXT,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

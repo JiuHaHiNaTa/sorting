@@ -1,6 +1,5 @@
 package com.example.sorting.service;
 
-import com.example.sorting.cache.MasterDataCache;
 import com.example.sorting.entity.CdrPushRecord;
 import com.example.sorting.entity.CdrRecord;
 import com.example.sorting.entity.Operator;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +39,6 @@ public class CdrPushKafkaImpl implements CdrPushService {
     private CdrPushRecordMapper pushRecordMapper;
     @Autowired
     private CdrRecordMapper cdrRecordMapper;
-    @Autowired
-    private MasterDataCache masterDataCache;
     @Autowired
     private OperatorMapper operatorMapper;
     @Autowired
@@ -127,7 +125,7 @@ public class CdrPushKafkaImpl implements CdrPushService {
         CdrPushMessage msg = new CdrPushMessage();
         msg.setMessageId(UUID.randomUUID().toString());
         msg.setCdrRecordId(cdrRecordId);
-        msg.setPushedAt(LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        msg.setPushedAt(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
 
         // 通过各 Mapper 将 ID 翻译为业务 code
         CdrPushMessage.Payload payload = new CdrPushMessage.Payload();
@@ -153,28 +151,19 @@ public class CdrPushKafkaImpl implements CdrPushService {
 
     private String lookupOperatorCode(String operatorId) {
         if (operatorId == null) return null;
-        // 先从 MasterDataCache 中尝试通过 code 查找（数据模型缓存键为 code）
-        // 若 operatorId 本身就是 code，则直接返回
-        Operator op = masterDataCache.getOperatorByCode(operatorId);
-        if (op != null) return op.getCode();
-        // 通过 Mapper 按 ID 查询
-        op = operatorMapper.selectById(operatorId);
+        Operator op = operatorMapper.selectById(operatorId);
         return op != null ? op.getCode() : null;
     }
 
     private String lookupAzCode(String azId) {
         if (azId == null) return null;
-        ServiceAz az = masterDataCache.getAzByCode(azId);
-        if (az != null) return az.getCode();
-        az = serviceAzMapper.selectById(azId);
+        ServiceAz az = serviceAzMapper.selectById(azId);
         return az != null ? az.getCode() : null;
     }
 
     private String lookupUnitCode(String unitId) {
         if (unitId == null) return null;
-        UsageUnit unit = masterDataCache.getUnitByCode(unitId);
-        if (unit != null) return unit.getCode();
-        unit = usageUnitMapper.selectById(unitId);
+        UsageUnit unit = usageUnitMapper.selectById(unitId);
         return unit != null ? unit.getCode() : null;
     }
 

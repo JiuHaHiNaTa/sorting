@@ -57,7 +57,10 @@ public class ParseStepHandler implements StepHandler {
 
         String fileServerId = context.getTask().getFileServerId();
         FileServerConfig config = configMapper.findById(fileServerId).orElse(null);
-        String sourceDir = (config != null) ? config.getFileDirectory() : "";
+        if (config == null) {
+            return StepResult.failed("文件服务器配置不存在: " + fileServerId);
+        }
+        String sourceDir = config.getFileDirectory();
 
         List<CdrRecord> allRecords = new ArrayList<>();
         int totalRows = 0;

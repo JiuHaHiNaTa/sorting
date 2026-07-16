@@ -31,8 +31,6 @@ public class SortingService {
     private SortingStepLogMapper stepLogMapper;
     @Autowired
     private PipelineExecutor pipelineExecutor;
-    @Autowired(required = false)
-    private CdrPushService cdrPushService;
 
     /**
      * 触发分拣：扫描所有 enabled=true + connectivityStatus=true 的文件服务器
@@ -62,11 +60,6 @@ public class SortingService {
 
             pipelineExecutor.startTask(task);
             created++;
-        }
-
-        // 分拣任务创建后，触发推送调度（推送由 CdrPushService 定时任务处理）
-        if (cdrPushService != null) {
-            cdrPushService.pushPendingRecords();
         }
 
         return created;

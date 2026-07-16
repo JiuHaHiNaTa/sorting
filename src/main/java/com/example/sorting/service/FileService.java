@@ -87,6 +87,32 @@ public class FileService {
         return fileNames;
     }
 
+    /** 列出目录下所有子目录名（仅直接子目录，不含文件） */
+    public List<String> listDirectories(FileServerConfig config, String directoryPath) {
+        MinioClient client = createClient(config);
+        List<String> dirNames = new ArrayList<>();
+        try {
+            String prefix = directoryPath.endsWith("/") ? directoryPath : directoryPath + "/";
+            Iterable<Result<Item>> results = client.listObjects(
+                    ListObjectsArgs.builder()
+                            .bucket(config.getBucketName())
+                            .prefix(prefix)
+                            .delimiter("/")
+                            .build());
+            for (Result<Item> result : results) {
+                Item item = result.get();
+                String objectName = item.objectName();
+                // 子目录条目以 delimiter 结尾，去掉前缀和尾部 delimiter
+                if (objectName.endsWith("/") && objectName.startsWith(prefix) && !objectName.equals(prefix)) {
+                    dirNames.add(objectName.substring(prefix.length(), objectName.length() - 1));
+                }
+            }
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.FILE_002, "列出子目录失败: " + e.getMessage());
+        }
+        return dirNames;
+    }
+
     /** 从 MinIO 下载文件到本地临时目录 */
     public Path downloadFile(FileServerConfig config, String objectName) {
         MinioClient client = createClient(config);
@@ -101,6 +127,9 @@ public class FileService {
                 GetObjectArgs.builder().bucket(config.getBucketName()).object(objectName).build())) {
             Files.copy(stream, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
+            // 清理临时文件/目录，防止泄漏
+            try { Files.deleteIfExists(targetPath); } catch (Exception ignored) {}
+            try { Files.deleteIfExists(tempDir); } catch (Exception ignored) {}
             throw new BusinessException(ErrorCode.FILE_002, "下载文件失败: " + e.getMessage());
         }
         return targetPath;

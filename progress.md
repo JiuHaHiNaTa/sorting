@@ -93,3 +93,25 @@
 - **FileCleanupJob** — 定时清理 7 天前备份文件、30 天前异常记录
 - **CdrErrorRecord** — 异常文件记录表
 - **CdrPushRecord** — 推送记录表（PENDING → PUSHED → FAILED）
+
+---
+
+## 会话 5 — 2026-07-16
+
+### Code Review 修复（v0.0.3 bug 修复）
+
+由 `/code-review`（high effort）发现 6 个问题并全部修复。
+
+| # | 问题 | 文件 | 修改 |
+|---|------|------|------|
+| 1 | FileCleanupJob 子目录清理永远失效 | FileService.java, FileCleanupJob.java | 新增 `listDirectories()` 方法使用 delimiter 获取子目录 |
+| 2 | ParseStepHandler null config → NPE | ParseStepHandler.java | config 为 null 时提前返回错误 |
+| 3 | CdrPushKafkaImpl MasterDataCache 死代码 | CdrPushKafkaImpl.java | 移除无效的 cache lookup |
+| 4 | Kafka pushedAt 缺少时区信息 | CdrPushKafkaImpl.java | `ISO_LOCAL_DATE_TIME` → `ISO_INSTANT` |
+| 5 | SortingService 推送调用时机错误 | SortingService.java | 移除异步 pipeline 后立即调用的空转推送 |
+| 6 | FileService.downloadFile 临时目录泄漏 | FileService.java | catch 块添加 temp dir 清理 |
+
+#### 构建验证
+- 主代码编译: ✅ PASS
+- 测试代码编译: ✅ PASS
+- `mvn test`: ⚠️ 环境中 Mockito/ByteBuddy 预存问题（114 errors），原始代码也全量复现，与本次修改无关

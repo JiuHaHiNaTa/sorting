@@ -56,9 +56,8 @@ public class FileCleanupJob {
     private void cleanupDirectory(FileServerConfig config, String baseDir, String cutoffStr) {
         try {
             // 列出 baseDir 下所有子目录
-            List<String> subDirs = fileService.listFiles(config, baseDir);
-            for (String subDir : subDirs) {
-                String dirName = subDir.replaceAll("/", "");
+            List<String> subDirs = fileService.listDirectories(config, baseDir);
+            for (String dirName : subDirs) {
                 // 判断是否是日期目录且在 cutoff 之前
                 if (isDateBefore(dirName, cutoffStr)) {
                     String fullPath = baseDir + "/" + dirName;

@@ -38,10 +38,10 @@ class FileCleanupJobTest {
         FileServerConfig config = new FileServerConfig();
         config.setId("server-1");
         when(configMapper.findAll()).thenReturn(List.of(config));
-        when(fileService.listFiles(any(FileServerConfig.class), eq("/backup"))).thenReturn(List.of());
-        when(fileService.listFiles(any(FileServerConfig.class), eq("/error"))).thenReturn(List.of());
+        when(fileService.listDirectories(any(FileServerConfig.class), eq("/backup"))).thenReturn(List.of());
+        when(fileService.listDirectories(any(FileServerConfig.class), eq("/error"))).thenReturn(List.of());
         cleanupJob.cleanupOldFiles();
-        verify(fileService, times(2)).listFiles(any(FileServerConfig.class), anyString());
+        verify(fileService, times(2)).listDirectories(any(FileServerConfig.class), anyString());
     }
 
     @Test
